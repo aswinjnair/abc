@@ -26,16 +26,20 @@ let token = "EAAafRi5SJtUBAK7wlZCgAXrlLeUZBW4iDlowKkAZAmoBkHruTrQeLkZABjyaRoFxT2
 app.get('/webhook/', function(req, res) {
 	if (req.query['hub.verify_token'] === "testbot_verify_token") {
 		res.send(req.query['hub.challenge'])
+
 	}
 	res.send("Wrong token")
 })
 
-app.post('/webhook/', function(req, res) {
+app.post('/webhook/', function(req, res) 
+{
 	let messaging_events = req.body.entry[0].messaging
-	for (let i = 0; i < messaging_events.length; i++) {
+	for (let i = 0; i < messaging_events.length; i++) 
+	{
 		let event = messaging_events[i]
 		let sender = event.sender.id
-		if (event.message && event.message.text) {
+		if (event.message && event.message.text)
+		{
 			let text = event.message.text
 			decideMessage(sender, text)
 			//sendText(sender, "Text echo: " + text.substring(0, 100))
@@ -44,16 +48,22 @@ app.post('/webhook/', function(req, res) {
 	res.sendStatus(200)
 })
 
-function decideMessage(sender, text){
-	let text = text1/toLowerCase();
-	if(text.includes("summer")){
-sendImage(sender)
-	}
-	else if(text.includes("winter")){
 
+
+function decideMessage(sender, text1)
+{
+	let text = text1.toLowerCase();
+	if(text.includes("summer"))
+	{
+        sendImage(sender)
 	}
-	else{
-		sendText(sender,"i like rain " +emoji.get('cloud')+". ")
+	else if(text.includes("winter"))
+	{
+           genericMsg(sender)
+	}
+	else
+	{
+		sendText(sender,"i like rain " +emoji.get('cloud')+" " +emoji.get('umbrella')+" !!!")
 		sendButton(sender,"what is your favourate seson?")
 	}
 
@@ -61,15 +71,19 @@ sendImage(sender)
 
 
 
-function sendText(sender, text) {
+function sendText(sender, text) 
+{
 	let messageData = {text: text}
 	sendRequest(sender, messageData)
 	
 }
 
-function sentButton(sender, text){
-	let messageData={  
-		"attachment":{
+function sentButton(sender, text)
+{
+	let messageData=
+	{ 
+		"attachment":
+		{
       "type":"template",
       "payload":{
         "template_type":"button",
@@ -87,7 +101,8 @@ function sentButton(sender, text){
           }
         ]
       }
-    }}
+       }
+    }
     sendRequest(sender,messageData)
 }
 
@@ -96,12 +111,44 @@ function sendImage(sender){
     "attachment":{
       "type":"image",
       "payload":{
-        "url":"https://www.google.co.in/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwi4von8l_nTAhUIf7wKHQ-JCpIQjRwIBw&url=http%3A%2F%2Fjuneauempire.com%2Fneighbors%2F2017-03-26%2Fthings-do-while-waiting-summer&psig=AFQjCNFMJ8yCVL22woE8zynGNjzq5rTevQ&ust=1495188128369486"
+        "url":"https://diethics.com/wp-content/uploads/2013/09/summer-planning.jpg"
       }
     }
   }
   sendRequest(sender,messageData)
 }
+
+function genericMsg(sender){
+	let messageData={
+		"attachment":{
+      "type":"template",
+      "payload":{
+        "template_type":"generic",
+        "elements":[
+           {
+            "title":"Winter",
+            "image_url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZDk3XTZgge48kZmiXVWZgmK2sAuJMA7BRevNRdeHJSIuMPO6d",
+            "subtitle":"I love winter",
+            
+            "buttons":[
+              {
+                "type":"web_url",
+                "url":"https://en.wikipedia.org/wiki/Winter",
+                "title":"Findout more"
+              }             
+            ]      
+          }
+        ]
+      }
+    }
+	}
+
+	sendRequest(sender,messageData)
+}
+
+
+
+
 function sendRequest(sender, messageData){
 	request({
 		url: "https://graph.facebook.com/v2.6/me/messages",
