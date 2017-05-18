@@ -64,7 +64,7 @@ function decideMessage(sender, text1)
 	else
 	{
 		sendText(sender,"i like rain " +emoji.get('cloud')+" " +emoji.get('umbrella')+" !!!")
-		sendButton(sender,"what is your favourate seson?")
+		sentButton(sender,"what is your favourate seson?")
 	}
 
 }
