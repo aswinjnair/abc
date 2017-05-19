@@ -4,6 +4,12 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
 const emoji=require('node-emoji')
+const APIAI_TOKEN = "411f0f79f5584f85b62c193ebc4275ce";
+const API_KEY = "AIzaSyAo4DkMcfZ6eFnN0nY3_PiPtNF8ch5ffW4";
+
+
+const apiai= require("apiai");
+const apiaiApp= apiai(APIAI_TOKEN);
 
 const app = express()
 
@@ -52,20 +58,28 @@ app.post('/webhook/', function(req, res)
 
 function decideMessage(sender, text1)
 {
-	let text = text1.toLowerCase();
-	if(text.includes("summer"))
-	{
-        sendImage(sender)
-	}
-	else if(text.includes("winter"))
-	{
-           genericMsg(sender)
-	}
-	else
-	{
-		sendText(sender,"i like rain " +emoji.get('cloud')+" " +emoji.get('umbrella')+" !!!")
-		sentButton(sender,"what is your favourate seson?")
-	}
+	
+  let text = event.message.text;
+
+  let apiai = apiaiApp.textRequest(text, {
+    sessionId: 'tabby_cat'
+  });
+
+  app.post('/ai', (req, res) => {
+  console.log('*** Webhook for api.ai query ***');
+  
+
+  if (req.body.result.action === 'booking') {
+    console.log('*** weather ***');
+    let city = req.body.result.parameters['place'];
+    let restUrl = ''; 
+        let msg = 'The current condition in ';
+        genericMsg(sender)
+	
+  }
+
+});
+	
 
 }
 
@@ -78,45 +92,8 @@ function sendText(sender, text)
 	
 }
 
-function sentButton(sender, text)
-{
-	let messageData=
-	{ 
-		"attachment":
-		{
-      "type":"template",
-      "payload":{
-        "template_type":"button",
-        "text":text,
-        "buttons":[
-          {
-            "type":"postback",
-            "title":"Summer",
-            "payload":"Show Website"
-          },
-          {
-            "type":"postback",
-            "title":"Winter",
-            "payload":"USER_DEFINED_PAYLOAD"
-          }
-        ]
-      }
-       }
-    }
-    sendRequest(sender,messageData)
-}
 
-function sendImage(sender){
-	let messageData={
-    "attachment":{
-      "type":"image",
-      "payload":{
-        "url":"https://diethics.com/wp-content/uploads/2013/09/summer-planning.jpg"
-      }
-    }
-  }
-  sendRequest(sender,messageData)
-}
+
 
 function genericMsg(sender){
 	let messageData={
@@ -148,8 +125,14 @@ function genericMsg(sender){
 
 
 
-
 function sendRequest(sender, messageData){
+	let apiai = apiaiApp.textRequest(text, {
+    sessionId: 'tabby_cat'
+  });
+apiai.on('response', (response) => {
+    console.log(response)
+    let aiText = response.result.fulfillment.speech;
+     messageData = aiText;
 	request({
 		url: "https://graph.facebook.com/v2.6/me/messages",
 		qs : {access_token: token},
@@ -165,6 +148,7 @@ function sendRequest(sender, messageData){
 			console.log("response body error")
 		}
 	})
+});
 }
 
 app.listen(app.get('port'), function() {
